@@ -5,20 +5,26 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Wood\StoreWoodRequest;
 use App\Http\Requests\Wood\UpdateWoodRequest;
 use App\Models\Wood;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class WoodController extends Controller
 {
     /* Display a listing of the resource. */
-    public function index()
+    public function index(Request $request)
     {
+        $sortBy = $request->query('sort', 'name');
+        $sortDirection = $request->query('direction', 'asc');
+
         $data_wood = Wood::select([
             'id', 'public_id', 'name', 'description'
-        ])->orderBy('name')->paginate(10);
+        ])->orderBy($sortBy, $sortDirection)->paginate(10);
 
         return Inertia::render('wood/WoodPage', [
-            'data_wood' => $data_wood
+            'data_wood' => $data_wood,
+            'sort_by' => $sortBy,
+            'sort_direction' => $sortDirection,
         ]);
     }
 

@@ -5,20 +5,26 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Category\StoreCategoryRequest;
 use App\Http\Requests\Category\UpdateCategoryRequest;
 use App\Models\Category;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class CategoryController extends Controller
 {
     /* Display a listing of the resource. */
-    public function index()
+    public function index(Request $request)
     {
+        $sortBy = $request->query('sort', 'name');
+        $sortDirection = $request->query('direction', 'asc');
+
         $data_category = Category::select([
             'id', 'public_id', 'name', 'slug', 'parent_id'
-        ])->with('parent:id,public_id,name,slug')->orderBy('name')->paginate(10);
+        ])->with('parent:id,public_id,name,slug')->orderBy($sortBy, $sortDirection)->paginate(10);
 
         return Inertia::render('category/CategoryPage', [
-            'data_category' => $data_category
+            'data_category' => $data_category,
+            'sort_by' => $sortBy,
+            'sort_direction' => $sortDirection,
         ]);
     }
 

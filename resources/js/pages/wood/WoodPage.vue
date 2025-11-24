@@ -26,14 +26,22 @@
             </AlertDialogContent>
         </AlertDialog>
         <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-6">
-            <!-- <Table>
+            <Table>
                 <TableHeader>
                     <TableRow>
                         <TableHead class="w-[5%] text-center">
                             #
                         </TableHead>
-                        <TableHead class="w-[15%]">
-                            Name
+                        <TableHead class="w-[15%] cursor-pointer" title="sort by name">
+                            <div @click="handleSort('name')" class="flex justify-between items-center">
+                                Name
+                                <template v-if="sortDirection == 'asc'">
+                                    <ArrowDownAZ class="ml-2 h-4 w-4" />
+                                </template>
+                                <template v-if="sortDirection == 'desc'">
+                                    <ArrowDownZA class="ml-2 h-4 w-4" />
+                                </template>
+                            </div>
                         </TableHead>
                         <TableHead class="w-[70%]">
                             Description
@@ -59,7 +67,7 @@
                             </Link>
                         </TableCell>
                         <TableCell class="text-left">
-                            <p class="line-clamp-2 transition-all duration-300 ease-out">
+                            <p class="line-clamp-1 transition-all duration-300 ease-out">
                                 {{ item.description }}
                             </p>
                         </TableCell>
@@ -85,8 +93,7 @@
                         </TableCell>
                     </TableRow>
                 </TableBody>
-            </Table> -->
-            <DataTable :columns="columns" :data="data" />
+            </Table>
             <!-- Pagination -->
             <Pagination v-slot="{ page }" @update:page="handlePageChange" :items-per-page="data_wood.per_page" :total="data_wood.total" :default-page="data_wood.current_page">
                 <PaginationContent v-slot="{ items }">
@@ -107,8 +114,8 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router } from '@inertiajs/vue3';
-import { Ellipsis } from 'lucide-vue-next';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
+import { ArrowDownAZ, ArrowDownZA, Ellipsis } from 'lucide-vue-next';
 import { onMounted, ref } from 'vue';
 import {
     AlertDialog,
@@ -144,9 +151,7 @@ import {
     TableHeader,
     TableRow
 } from '@/components/ui/table';
-import type { Wood } from '@/components/wood/columns';
-import { columns } from '@/components/columns'
-import DataTable from '@/components/wood/data-table.vue';
+
 interface Wood {
     id: number;
     public_id: string;
@@ -180,20 +185,66 @@ const props = defineProps<{
     data_wood: InertiaPaginated<Wood>
 }>();
 
+const page = usePage();
 const data = ref<Wood[]>([]);
-async function getData(): Promise<Wood[]> {
-    return props.data_wood.data
-}
-onMounted(async () => {
-  data.value = await getData()
-})
 const isDialogOpen = ref(false);
+const sortColumn = ref<string>(page.props.sort_by as string);
+const sortDirection = ref<'asc' | 'desc'>(page.props.sort_direction as 'asc' | 'desc');
 const actionType = ref<'archive' | 'destroy' | null>(null);
 const targetPublicId = ref<string | null>(null);
 const data_wood = ref<InertiaPaginated<Wood>>(props.data_wood);
 
+onMounted(async () => {
+    data.value = await getData();
+})
+
+async function getData(): Promise<Wood[]> {
+    return props.data_wood.data
+}
+
+const handleSort = (column: string) => {
+    let direction: 'asc' | 'desc' = 'asc';
+
+    if (sortDirection.value == 'asc') {
+        direction = 'desc';
+    } else {
+        direction = 'asc';
+    }
+
+    sortColumn.value = column;
+    sortDirection.value = direction;
+
+    const params: Record<string, string | number> = {
+        page: data_wood.value.current_page,
+    };
+
+    if (column && direction) {
+        params.sort = column;
+        params.direction = direction;
+    } else {
+        delete params.sort;
+        delete params.direction;
+    }
+
+    router.get(`/wood`, params, {
+        preserveState: true,
+        onSuccess: (page: any) => {
+            if (page.props.data_wood) {
+                data_wood.value = page.props.data_wood;
+            }
+        }
+    });
+}
+
 const handlePageChange = (page: number) => {
-    router.get('/wood', { page: page }, {
+    const params: Record<string, string | number | null> = { page: page };
+
+    if (sortColumn.value && sortDirection.value) {
+        params.sort = sortColumn.value;
+        params.direction = sortDirection.value;
+    }
+
+    router.get('/wood', params, {
             only: ['data_wood'],
             preserveScroll: true,
         }
@@ -214,23 +265,21 @@ const handleConfirmationAction = () => {
     const public_id = targetPublicId.value;
     const type = actionType.value;
 
+    const successCallback = (page: any) => {
+        if (page.props.data_wood) {
+            data_wood.value = page.props.data_wood;
+        }
+    };
+
     if (type === 'archive') {
         router.patch(`/wood/${public_id}/archive`, {}, {
             preserveScroll: true,
-            onSuccess: (page: any) => {
-                if (page.props.data_wood) {
-                    data_wood.value = page.props.data_wood
-                }
-            }
+            onSuccess: successCallback,
         });
     } else if (type === 'destroy') {
         router.delete(`/wood/${public_id}`, {
             preserveState: true,
-            onSuccess: (page: any) => {
-                if (page.props.data_wood) {
-                    data_wood.value = page.props.data_wood
-                }
-            }
+            onSuccess: successCallback,
         });
     }
 
@@ -238,4 +287,3 @@ const handleConfirmationAction = () => {
     actionType.value = null;
 };
 </script>
-

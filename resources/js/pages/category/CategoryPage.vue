@@ -32,14 +32,30 @@
                         <TableHead class="w-[5%] text-center">
                             #
                         </TableHead>
-                        <TableHead class="w-[30%]">
-                            Name
+                        <TableHead class="w-[30%] cursor-pointer" title="sort by name">
+                            <div @click="handleSort('name')" class="flex justify-between items-center">
+                                Name
+                                <template v-if="sortDirection == 'asc'">
+                                    <ArrowDownAZ class="ml-2 h-4 w-4" />
+                                </template>
+                                <template v-if="sortDirection == 'desc'">
+                                    <ArrowDownZA class="ml-2 h-4 w-4" />
+                                </template>
+                            </div>
                         </TableHead>
                         <TableHead class="w-[30%]">
                             Slug
                         </TableHead>
-                        <TableHead class="w-[25%]">
-                            Parent
+                        <TableHead class="w-[25%] cursor-pointer" title="sort by parent category">
+                            <div @click="handleSort('parent_id')" class="flex justify-between items-center">
+                                Parent
+                                <template v-if="sortDirection == 'asc'">
+                                    <ArrowDownAZ class="ml-2 h-4 w-4" />
+                                </template>
+                                <template v-if="sortDirection == 'desc'">
+                                    <ArrowDownZA class="ml-2 h-4 w-4" />
+                                </template>
+                            </div>
                         </TableHead>
                         <TableHead class="w-[10%] text-center">
                             Action
@@ -108,9 +124,9 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router } from '@inertiajs/vue3';
-import { Ellipsis } from 'lucide-vue-next';
-import { ref } from 'vue';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
+import { ArrowDownAZ, ArrowDownZA, Ellipsis } from 'lucide-vue-next';
+import { onMounted, ref } from 'vue';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -181,12 +197,65 @@ const props = defineProps<{
     data_category: InertiaPaginated<Category>
 }>();
 
+const page = usePage();
+const data = ref<Category[]>([]);
 const isDialogOpen = ref(false);
+const sortColumn = ref<string>(page.props.sort_by as string);
+const sortDirection = ref<'asc' | 'desc'>(page.props.sort_direction as 'asc' | 'desc');
 const actionType = ref<'archive' | 'destroy' | null>(null);
 const targetPublicId = ref<string | null>(null);
 const data_category = ref<InertiaPaginated<Category>>(props.data_category);
 
+onMounted(async () => {
+    data.value = await getData();
+})
+
+async function getData(): Promise<Category[]> {
+    return props.data_category.data
+}
+
+const handleSort = (column: string) => {
+    let direction: 'asc' | 'desc' = 'asc';
+
+    if (sortDirection.value == 'asc') {
+        direction = 'desc';
+    } else {
+        direction = 'asc';
+    }
+
+    sortColumn.value = column;
+    sortDirection.value = direction;
+
+    const params: Record<string, string | number> = {
+        page: data_category.value.current_page,
+    };
+
+    if (column && direction) {
+        params.sort = column;
+        params.direction = direction;
+    } else {
+        delete params.sort;
+        delete params.direction;
+    }
+
+    router.get(`/category`, params, {
+        preserveState: true,
+        onSuccess: (page: any) => {
+            if (page.props.data_category) {
+                data_category.value = page.props.data_category;
+            }
+        }
+    });
+}
+
 const handlePageChange = (page: number) => {
+    const params: Record<string, string | number | null> = { page: page };
+
+    if (sortColumn.value && sortDirection.value) {
+        params.sort = sortColumn.value;
+        params.direction = sortDirection.value;
+    }
+
     router.get('/category', { page: page }, {
             only: ['data_category'],
             preserveScroll: true,
@@ -208,23 +277,21 @@ const handleConfirmationAction = () => {
     const public_id = targetPublicId.value;
     const type = actionType.value;
 
+    const successCallback = (page: any) => {
+        if (page.props.data_category) {
+            data_category.value = page.props.data_category;
+        }
+    };
+
     if (type === 'archive') {
         router.patch(`/category/${public_id}/archive`, {}, {
             preserveScroll: true,
-            onSuccess: (page: any) => {
-                if (page.props.data_category) {
-                    data_category.value = page.props.data_category
-                }
-            }
+            onSuccess: successCallback,
         });
     } else if (type === 'destroy') {
         router.delete(`/category/${public_id}`, {
             preserveState: true,
-            onSuccess: (page: any) => {
-                if (page.props.data_category) {
-                    data_category.value = page.props.data_category
-                }
-            }
+            onSuccess: successCallback,
         });
     }
 

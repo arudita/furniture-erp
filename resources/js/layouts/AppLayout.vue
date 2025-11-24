@@ -34,8 +34,7 @@ onMounted(() => {
     processFlashMessage(page.props.flash);
 });
 
-watch(() => page.props.flash, (newMessage: any, oldMessage: any) => {
-    console.log(oldMessage);
+watch(() => page.props.flash, (newMessage: any) => {
     processFlashMessage(newMessage);
 }, { deep: true });
 
