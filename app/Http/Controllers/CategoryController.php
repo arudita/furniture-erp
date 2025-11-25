@@ -43,8 +43,7 @@ class CategoryController extends Controller
         try {
             $category = Category::create($validated);
 
-            // return to_route('category.show', $category->id)->with('success', $this->messages['save_success']);
-            return to_route('category.index')->with('success', $this->messages['save_success']);
+            return to_route('category.show', $category->public_id)->with('success', $this->messages['save_success']);
         } catch (\Exception $e) {
             Log::error('Failed to save category data: ' . $e->getMessage(), [
                 'input_data' => $validated
@@ -56,8 +55,15 @@ class CategoryController extends Controller
     /* Display the specified resource. */
     public function show(Category $category)
     {
+        $data_category = Category::select([
+            'id', 'public_id', 'name', 'slug', 'parent_id'
+        ])->with('parent:id,public_id,name,slug')->where('public_id', $category->public_id)->first();
+
+        $data_categories = Category::select('id', 'public_id', 'name', 'slug')->orderBy('name')->get();
+
         return Inertia::render('category/CategoryDetailsPage', [
-            'data_category' => $category->only('id', 'public_id', 'name', 'slug')
+            'data_category' => $data_category,
+            'data_categories' => $data_categories,
         ]);
     }
 
@@ -70,7 +76,7 @@ class CategoryController extends Controller
     /* Update the specified resource in storage. */
     public function update(UpdateCategoryRequest $request, Category $category)
     {
-        $validated = $request->safe()->only(['name', 'slug']);
+        $validated = $request->safe()->only(['name', 'slug', 'parent_id']);
 
         try {
             $category->update($validated);

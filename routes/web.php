@@ -15,8 +15,8 @@ Route::get('/', function () {
 })->name('home');
 
 
+// Route: Platform
 Route::middleware(['auth', 'can:staff'])->group(function () {
-    // Route: Platform
     Route::get('dashboard', fn () => Inertia::render('Dashboard'))->name('dashboard');
 
     Route::resource('project', ProjectController::class)->except('edit');
@@ -26,6 +26,7 @@ Route::middleware(['auth', 'can:staff'])->group(function () {
     Route::patch('/product/{product}/archive', [ProductController::class, 'archive'])->name('product.archive');
 });
 
+// Route: Manage
 Route::middleware(['auth', 'can:admin'])->group(function () {
     Route::resource('category', CategoryController::class)->except('edit');
     Route::patch('category/{category}/archive', [CategoryController::class, 'archive'])->name('category.archive');

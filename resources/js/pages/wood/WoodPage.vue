@@ -18,8 +18,8 @@
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel @click="isDialogOpen = false">Cancel</AlertDialogCancel>
-                    <AlertDialogAction @click="handleConfirmationAction">
+                    <AlertDialogCancel @click="isDialogOpen = false" class="cursor-pointer">Cancel</AlertDialogCancel>
+                    <AlertDialogAction @click="handleConfirmationAction" class="cursor-pointer">
                         {{ actionType === 'destroy' ? 'Delete' : 'Archive' }}
                     </AlertDialogAction>
                 </AlertDialogFooter>

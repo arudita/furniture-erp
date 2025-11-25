@@ -18,8 +18,8 @@
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel @click="isDialogOpen = false">Cancel</AlertDialogCancel>
-                    <AlertDialogAction @click="handleConfirmationAction">
+                    <AlertDialogCancel @click="isDialogOpen = false" class="cursor-pointer">Cancel</AlertDialogCancel>
+                    <AlertDialogAction @click="handleConfirmationAction" class="cursor-pointer">
                         {{ actionType === 'destroy' ? 'Delete' : 'Archive' }}
                     </AlertDialogAction>
                 </AlertDialogFooter>
@@ -73,7 +73,9 @@
                             {{ index + 1 }}
                         </TableCell>
                         <TableCell class="text-left">
-                            {{ item.name }}
+                            <Link :href="`/category/${item.public_id}`" class="block w-full cursor-pointer hover:underline underline-offset-4">
+                                {{ item.name }}
+                            </Link>
                         </TableCell>
                         <TableCell class="text-left">
                             {{ item.slug }}
@@ -167,8 +169,8 @@ interface Category {
     public_id: string;
     name: string;
     slug: string;
-    parent_id: number;
-    parent: Category;
+    parent_id?: number;
+    parent?: Category;
 }
 
 interface PaginationLink {

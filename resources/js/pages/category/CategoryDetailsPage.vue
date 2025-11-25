@@ -1,14 +1,17 @@
 <template>
-    <Head title="Create New Category" />
+    <Head :title="data_category.name" />
     <AppLayout :breadcrumbs="breadcrumbs">
-        <Form v-bind="CategoryController.store.form()" :options="{preserveScroll: true}" reset-on-success reset-on-error v-slot="{ errors, processing, recentlySuccessful }" autocomplete="off">
+        <Form v-bind="CategoryController.update.form(form_category)" :options="{preserveScroll: true}" v-slot="{ errors, processing, recentlySuccessful }" autocomplete="off">
             <div class="flex flex-col p-6">
                 <section class="max-w-xl space-y-6">
-                    <HeadingSmall title="Create New Category" description="Ensure your account is using a long, random password to stay secure" />
+                    <HeadingSmall :title="'Category: ' + data_category.name" description="Ensure your account is using a long, random password to stay secure" />
                     <div class="space-y-6">
                         <div class="grid gap-2">
                             <Label for="name">Name</Label>
-                            <Input id="name" name="name" v-model="form_category.name" type="text" class="mt-1 block w-full" :class="errors.name ? 'border-red-500': ''" placeholder="Name" />
+                            <Input v-if="editMode" id="name" name="name" v-model="form_category.name" type="text" class="mt-1 block w-full" :class="errors.name ? 'border-red-500': ''" placeholder="Name" />
+                            <p v-else class="mt-1 block w-full leading-7 text-sm/relaxed">
+                                {{ form_category.name }}
+                            </p>
                             <InputError :message="errors.name || errors.slug" />
                         </div>
                         <div class="grid gap-2">
@@ -18,7 +21,7 @@
                         <div class="grid gap-2">
                             <Label for="parent_id">Parent</Label>
                             <Input id="parent_id" name="parent_id" :value="form_category.parent_id" type="hidden" class="sr-only hidden" />
-                            <Popover v-model:open="openCommand">
+                            <Popover v-if="editMode" v-model:open="openCommand">
                                 <PopoverTrigger as-child>
                                     <Button variant="outline" role="combobox" :aria-expanded="openCommand" class="w-full justify-between">
                                         {{ selectedParentCategory?.name || "Select parent category..." }}
@@ -32,7 +35,7 @@
                                             <CommandEmpty>No category found.</CommandEmpty>
                                             <CommandGroup>
                                                 <CommandItem value="" @select="(ev) => { selectCategory(null) }">None</CommandItem>
-                                                <CommandItem v-for="item in data_category" :key="item.id" :value="item.id" @select="(ev) => { selectCategory(ev.detail.value as number) }">
+                                                <CommandItem v-for="item in data_categories" :key="item.id" :value="item.id" @select="(ev) => { selectCategory(ev.detail.value as number) }">
                                                     {{ item.name }}
                                                     <CheckIcon :class="cn('ml-auto', selectedParentId === item.id ? 'opacity-100' : 'opacity-0')" />
                                                 </CommandItem>
@@ -41,13 +44,17 @@
                                     </Command>
                                 </PopoverContent>
                             </Popover>
-                            <p class="text-sm text-muted-foreground">
+                            <p v-else class="mt-1 block w-full leading-7 text-sm/relaxed">
+                                {{ form_category.parent?.name ?? '-' }}
+                            </p>
+                            <p v-if="editMode" class="text-sm text-muted-foreground">
                                 Optional. Categories, can have a hierarchy. You might have a Table category, and under that have children categories for Dining and Living Room.
                             </p>
                             <InputError :message="errors.parent_id" />
                         </div>
                         <div class="flex items-center gap-4">
-                            <Button :disabled="processing" data-test="update-password-button" class="cursor-pointer">Save</Button>
+                            <Button v-if="editMode" :disabled="processing" class="cursor-pointer">Save</Button>
+                            <Button v-else @click="editMode = true" class="cursor-pointer">Edit</Button>
                             <Transition enter-active-class="transition ease-in-out" enter-from-class="opacity-0" leave-active-class="transition ease-in-out" leave-to-class="opacity-0">
                                 <p v-show="recentlySuccessful" class="text-sm text-neutral-600">
                                     Saved.
@@ -72,7 +79,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { type BreadcrumbItem } from '@/types';
 import { cn } from '@/lib/utils';
-import { computed, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { CheckIcon, ChevronsUpDownIcon } from 'lucide-vue-next';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
@@ -82,8 +89,15 @@ interface Category {
     public_id: string;
     name: string;
     slug: string;
-    parent_id?: number;
+    parent_id?: number | null;
+    parent?: Category;
 }
+
+const editMode = ref(false);
+const openCommand = ref(false);
+const selectedParentId = ref<number | null>(null);
+const data_category = usePage().props.data_category as Category;
+const data_categories = usePage().props.data_categories as Category[];
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -91,24 +105,24 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: '/wood',
     },
     {
-        title: 'Create New',
+        title: data_category.name,
         href: '#',
     },
 ];
 
-const openCommand = ref(false);
-const selectedParentId = ref<number | null>(null);
-const data_category = usePage().props.data_category as Category[];
-
-const form_category = useForm({
-    name: '',
-    slug: '',
-    parent_id: null as number | null,
-})
+const form_category = useForm<Category>({
+    id: data_category.id,
+    public_id: data_category.public_id,
+    name: data_category.name,
+    slug: data_category.slug,
+    parent_id: data_category.parent_id,
+    parent: data_category.parent,
+});
 
 const selectedParentCategory = computed(() =>
-    data_category.find(category => category.id === selectedParentId.value),
+    data_categories.find(category => category.id === selectedParentId.value),
 )
+
 const selectCategory = (selectedValue: number | null) => {
     const new_parent_id = selectedValue == selectedParentId.value ? null : selectedValue;
     selectedParentId.value = new_parent_id;
@@ -118,6 +132,12 @@ const selectCategory = (selectedValue: number | null) => {
 
 watch(() => form_category.name, (new_name) => {
     form_category.slug = GenerateSlug(new_name);
+})
+
+onMounted(() => {
+    if (data_category.parent_id) {
+        selectedParentId.value = data_category.parent_id
+    }
 })
 
 const GenerateSlug = (text: string) => {
