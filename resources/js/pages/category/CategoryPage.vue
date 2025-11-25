@@ -125,68 +125,15 @@
 
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
-import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router, usePage } from '@inertiajs/vue3';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { ArrowDownAZ, ArrowDownZA, Ellipsis } from 'lucide-vue-next';
-import { onMounted, ref } from 'vue';
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle
-} from '@/components/ui/alert-dialog';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu';
-import {
-    Pagination,
-    PaginationContent,
-    PaginationEllipsis,
-    PaginationItem,
-    PaginationNext,
-    PaginationPrevious
-} from '@/components/ui/pagination';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow
-} from '@/components/ui/table';
-
-interface Category {
-    id: number;
-    public_id: string;
-    name: string;
-    slug: string;
-    parent_id?: number;
-    parent?: Category;
-}
-
-interface PaginationLink {
-    url: string | null;
-    label: string;
-    page: number | null;
-    active: boolean;
-}
-
-interface InertiaPaginated<T> {
-    current_page: number;
-    data: T[];
-    links: PaginationLink[];
-    total: number;
-    per_page: number;
-}
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
+import { ref } from 'vue';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import type { BreadcrumbItem, InertiaPaginated } from '@/types';
+import type { Category } from '@/types/category';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -199,22 +146,11 @@ const props = defineProps<{
     data_category: InertiaPaginated<Category>
 }>();
 
-const page = usePage();
-const data = ref<Category[]>([]);
 const isDialogOpen = ref(false);
-const sortColumn = ref<string>(page.props.sort_by as string);
-const sortDirection = ref<'asc' | 'desc'>(page.props.sort_direction as 'asc' | 'desc');
+const sortColumn = ref<string>(usePage().props.sort_by as string);
+const sortDirection = ref<'asc' | 'desc'>(usePage().props.sort_direction as 'asc' | 'desc');
 const actionType = ref<'archive' | 'destroy' | null>(null);
 const targetPublicId = ref<string | null>(null);
-const data_category = ref<InertiaPaginated<Category>>(props.data_category);
-
-onMounted(async () => {
-    data.value = await getData();
-})
-
-async function getData(): Promise<Category[]> {
-    return props.data_category.data
-}
 
 const handleSort = (column: string) => {
     let direction: 'asc' | 'desc' = 'asc';
@@ -229,7 +165,7 @@ const handleSort = (column: string) => {
     sortDirection.value = direction;
 
     const params: Record<string, string | number> = {
-        page: data_category.value.current_page,
+        page: props.data_category.current_page,
     };
 
     if (column && direction) {
@@ -240,14 +176,7 @@ const handleSort = (column: string) => {
         delete params.direction;
     }
 
-    router.get(`/category`, params, {
-        preserveState: true,
-        onSuccess: (page: any) => {
-            if (page.props.data_category) {
-                data_category.value = page.props.data_category;
-            }
-        }
-    });
+    router.get(`/category`, params, { preserveState: true });
 }
 
 const handlePageChange = (page: number) => {
@@ -279,22 +208,10 @@ const handleConfirmationAction = () => {
     const public_id = targetPublicId.value;
     const type = actionType.value;
 
-    const successCallback = (page: any) => {
-        if (page.props.data_category) {
-            data_category.value = page.props.data_category;
-        }
-    };
-
     if (type === 'archive') {
-        router.patch(`/category/${public_id}/archive`, {}, {
-            preserveScroll: true,
-            onSuccess: successCallback,
-        });
+        router.patch(`/category/${public_id}/archive`, {}, { preserveScroll: true });
     } else if (type === 'destroy') {
-        router.delete(`/category/${public_id}`, {
-            preserveState: true,
-            onSuccess: successCallback,
-        });
+        router.delete(`/category/${public_id}`, { preserveState: true });
     }
 
     targetPublicId.value = null;

@@ -54,3 +54,18 @@ export interface AppSettings {
 declare interface Window {
     AppConfig: AppSettings;
 }
+
+export interface PaginationLink {
+    url: string | null;
+    label: string;
+    page: number | null;
+    active: boolean;
+}
+
+export interface InertiaPaginated<T> {
+    current_page: number;
+    data: T[];
+    links: PaginationLink[];
+    total: number;
+    per_page: number;
+}

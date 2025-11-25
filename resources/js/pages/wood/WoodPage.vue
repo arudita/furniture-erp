@@ -57,9 +57,9 @@
                         <TableCell class="text-left text-gray-600 dark:text-gray-300" colspan="2">— data is empty —</TableCell>
                         <TableCell></TableCell>
                     </TableRow>
-                    <TableRow v-else v-for="(item, index) in data_wood.data" :key="index">
+                    <TableRow v-else v-for="(item, index) in data_wood.data" :key="item.public_id">
                         <TableCell class="font-medium text-center">
-                            {{ index + 1 }}
+                            {{ (data_wood.current_page - 1) * data_wood.per_page + index + 1 }}
                         </TableCell>
                         <TableCell class="text-left">
                             <Link :href="`/wood/${item.public_id}`" class="block w-full cursor-pointer hover:underline underline-offset-4">
@@ -113,66 +113,15 @@
 
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
-import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router, usePage } from '@inertiajs/vue3';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { ArrowDownAZ, ArrowDownZA, Ellipsis } from 'lucide-vue-next';
-import { onMounted, ref } from 'vue';
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle
-} from '@/components/ui/alert-dialog';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu';
-import {
-    Pagination,
-    PaginationContent,
-    PaginationEllipsis,
-    PaginationItem,
-    PaginationNext,
-    PaginationPrevious
-} from '@/components/ui/pagination';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow
-} from '@/components/ui/table';
-
-interface Wood {
-    id: number;
-    public_id: string;
-    name: string;
-    description: string;
-}
-
-interface PaginationLink {
-    url: string | null;
-    label: string;
-    page: number | null;
-    active: boolean;
-}
-
-interface InertiaPaginated<T> {
-    current_page: number;
-    data: T[];
-    links: PaginationLink[];
-    total: number;
-    per_page: number;
-}
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
+import { ref } from 'vue';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { type BreadcrumbItem, InertiaPaginated } from '@/types';
+import { type Wood } from '@/types/wood';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -185,22 +134,11 @@ const props = defineProps<{
     data_wood: InertiaPaginated<Wood>
 }>();
 
-const page = usePage();
-const data = ref<Wood[]>([]);
 const isDialogOpen = ref(false);
-const sortColumn = ref<string>(page.props.sort_by as string);
-const sortDirection = ref<'asc' | 'desc'>(page.props.sort_direction as 'asc' | 'desc');
+const sortColumn = ref<string>(usePage().props.sort_by as string);
+const sortDirection = ref<'asc' | 'desc'>(usePage().props.sort_direction as 'asc' | 'desc');
 const actionType = ref<'archive' | 'destroy' | null>(null);
 const targetPublicId = ref<string | null>(null);
-const data_wood = ref<InertiaPaginated<Wood>>(props.data_wood);
-
-onMounted(async () => {
-    data.value = await getData();
-})
-
-async function getData(): Promise<Wood[]> {
-    return props.data_wood.data
-}
 
 const handleSort = (column: string) => {
     let direction: 'asc' | 'desc' = 'asc';
@@ -215,7 +153,7 @@ const handleSort = (column: string) => {
     sortDirection.value = direction;
 
     const params: Record<string, string | number> = {
-        page: data_wood.value.current_page,
+        page: props.data_wood.current_page,
     };
 
     if (column && direction) {
@@ -226,14 +164,7 @@ const handleSort = (column: string) => {
         delete params.direction;
     }
 
-    router.get(`/wood`, params, {
-        preserveState: true,
-        onSuccess: (page: any) => {
-            if (page.props.data_wood) {
-                data_wood.value = page.props.data_wood;
-            }
-        }
-    });
+    router.get(`/wood`, params, { preserveState: true });
 }
 
 const handlePageChange = (page: number) => {
@@ -265,22 +196,10 @@ const handleConfirmationAction = () => {
     const public_id = targetPublicId.value;
     const type = actionType.value;
 
-    const successCallback = (page: any) => {
-        if (page.props.data_wood) {
-            data_wood.value = page.props.data_wood;
-        }
-    };
-
     if (type === 'archive') {
-        router.patch(`/wood/${public_id}/archive`, {}, {
-            preserveScroll: true,
-            onSuccess: successCallback,
-        });
+        router.patch(`/wood/${public_id}/archive`, {}, { preserveScroll: true });
     } else if (type === 'destroy') {
-        router.delete(`/wood/${public_id}`, {
-            preserveState: true,
-            onSuccess: successCallback,
-        });
+        router.delete(`/wood/${public_id}`, { preserveState: true });
     }
 
     targetPublicId.value = null;

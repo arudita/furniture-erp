@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Product\StoreProductRequest;
 use App\Http\Requests\Product\UpdateProductRequest;
+use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductAttribute;
 use App\Models\ProductImage;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
@@ -15,21 +17,27 @@ use Inertia\Inertia;
 class ProductController extends Controller
 {
     /* Display a listing of the resource. */
-    public function index()
+    public function index(Request $request)
     {
+        $sortBy = $request->query('sort', 'name');
+        $sortDirection = $request->query('direction', 'asc');
+
         $data_product = Product::select([
             'id', 'public_id', 'category_id', 'name', 'description', 'product_code', 'unit_price'
-        ])->orderBy('name')->paginate(3);
+        ])->with('category:id,public_id,name,slug')->orderBy($sortBy, $sortDirection)->paginate(3);
 
         return Inertia::render('product/ProductPage', [
-            'data_product' => $data_product
+            'data_product' => $data_product,
+            'sort_by' => $sortBy,
+            'sort_direction' => $sortDirection,
         ]);
     }
 
     /* Show the form for creating a new resource. */
     public function create()
     {
-        return Inertia::render('product/ProductCreatePage');
+        $data_category = Category::select('id', 'public_id', 'name', 'slug')->orderBy('name')->get();
+        return Inertia::render('product/ProductCreatePage', ['data_category' => $data_category]);
     }
 
     /* Store a newly created resource in storage. */

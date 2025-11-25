@@ -20,6 +20,26 @@ const menu: NavMenu[] = [
                 icon: LayoutGrid,
             },
             {
+                title: 'Product',
+                href: '#',
+                icon: Package,
+                isActive: (page.url.split('/')[1] == 'product'),
+                items: [
+                    {
+                        title: 'Lists',
+                        href: '/product',
+                    },
+                    {
+                        title: 'Create New',
+                        href: '/product/create',
+                    },
+                    {
+                        title: 'Archived',
+                        href: '#',
+                    },
+                ]
+            },
+            {
                 title: 'Project',
                 href: '#',
                 icon: FolderOpen,
@@ -38,11 +58,6 @@ const menu: NavMenu[] = [
                         href: '#',
                     },
                 ]
-            },
-            {
-                title: 'Product',
-                href: '/product',
-                icon: Package,
             },
         ]
     },

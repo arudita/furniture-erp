@@ -19,7 +19,7 @@ class WoodController extends Controller
 
         $data_wood = Wood::select([
             'id', 'public_id', 'name', 'description'
-        ])->orderBy($sortBy, $sortDirection)->paginate(10);
+        ])->orderBy($sortBy, $sortDirection)->paginate(3);
 
         return Inertia::render('wood/WoodPage', [
             'data_wood' => $data_wood,
