@@ -81,7 +81,7 @@ class CategoryController extends Controller
         try {
             $category->update($validated);
 
-            return to_route('category.index')->with('success', $this->messages['update_success']);
+            return to_route('category.show', $category->public_id)->with('success', $this->messages['update_success']);
         } catch (\Exception $e) {
             Log::error('Failed to update category data: ' . $e->getMessage(), [
                 'input_data' => $validated

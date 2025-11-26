@@ -12,7 +12,40 @@ export function urlIsActive(
     urlToCheck: NonNullable<InertiaLinkProps['href']>,
     currentUrl: string,
 ) {
-    return toUrl(urlToCheck) === currentUrl;
+    const menuUrl = toUrl(urlToCheck);
+
+    if (menuUrl === currentUrl) {
+        return true;
+    }
+
+    if (currentUrl.startsWith(menuUrl + '/')) {
+        const strictMatchUrls = [
+            '/wood/create',
+            '/wood/archived',
+            '/category/create',
+            '/category/archived',
+        ];
+
+        if (menuUrl === '/wood') {
+            const isChildRouteWithStrictMatch = strictMatchUrls.includes(currentUrl);
+            if (isChildRouteWithStrictMatch) {
+                return false;
+            }
+        }
+
+        if (menuUrl === '/category') {
+            const isChildRouteWithStrictMatch = strictMatchUrls.includes(currentUrl);
+            if (isChildRouteWithStrictMatch) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    return false;
+
+    // return toUrl(urlToCheck) === currentUrl;
 }
 
 export function toUrl(href: NonNullable<InertiaLinkProps['href']>) {

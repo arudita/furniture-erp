@@ -74,7 +74,9 @@
                         <TableCell class="text-center">
                             <DropdownMenu>
                                 <DropdownMenuTrigger>
-                                    <Ellipsis class="text-gray-600 hover:cursor-pointer"/>
+                                    <Button type="button" variant="ghost" size="icon" class="cursor-pointer">
+                                        <Ellipsis/>
+                                    </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                     <DropdownMenuLabel>Actions</DropdownMenuLabel>

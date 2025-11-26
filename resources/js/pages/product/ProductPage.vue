@@ -108,7 +108,9 @@
                         <TableCell class="text-center">
                             <DropdownMenu>
                                 <DropdownMenuTrigger>
-                                    <Ellipsis class="text-gray-600 hover:cursor-pointer"/>
+                                    <Button type="button" variant="ghost" size="icon" class="cursor-pointer">
+                                        <Ellipsis/>
+                                    </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
@@ -147,77 +149,16 @@
 
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
-import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { ArrowDownAZ, ArrowDownZA, Ellipsis } from 'lucide-vue-next';
-import { onMounted, ref } from 'vue';
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle
-} from '@/components/ui/alert-dialog';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu';
-import {
-    Pagination,
-    PaginationContent,
-    PaginationEllipsis,
-    PaginationItem,
-    PaginationNext,
-    PaginationPrevious
-} from '@/components/ui/pagination';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow
-} from '@/components/ui/table';
-
-interface Category {
-    id: number;
-    public_id: string;
-    name: string;
-    slug: string;
-}
-
-interface Product {
-    id: number;
-    public_id: string;
-    category_id: number;
-    category: Category;
-    name: string;
-    description: string;
-    product_code: string;
-    unit_price: number;
-}
-
-interface PaginationLink {
-    url: string | null;
-    label: string;
-    page: number | null;
-    active: boolean;
-}
-
-interface InertiaPaginated<T> {
-    current_page: number;
-    data: T[];
-    links: PaginationLink[];
-    total: number;
-    per_page: number;
-}
+import { ref } from 'vue';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { type BreadcrumbItem, InertiaPaginated } from '@/types';
+import { type Product } from '@/types/product';
+import { Button } from '@/components/ui/button';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -230,22 +171,11 @@ const props = defineProps<{
     data_product: InertiaPaginated<Product>
 }>();
 
-const page = usePage();
-const data = ref<Product[]>([]);
 const isDialogOpen = ref(false);
-const sortColumn = ref<string>(page.props.sort_by as string);
-const sortDirection = ref<'asc' | 'desc'>(page.props.sort_direction as 'asc' | 'desc');
+const sortColumn = ref<string>(usePage().props.sort_by as string);
+const sortDirection = ref<'asc' | 'desc'>(usePage().props.sort_direction as 'asc' | 'desc');
 const actionType = ref<'archive' | 'destroy' | null>(null);
 const targetPublicId = ref<string | null>(null);
-const data_product = ref<InertiaPaginated<Product>>(props.data_product);
-
-onMounted(async () => {
-    data.value = await getData();
-})
-
-async function getData(): Promise<Product[]> {
-    return props.data_product.data
-}
 
 const handleSort = (column: string) => {
     let direction: 'asc' | 'desc' = 'asc';
@@ -260,7 +190,7 @@ const handleSort = (column: string) => {
     sortDirection.value = direction;
 
     const params: Record<string, string | number> = {
-        page: data_product.value.current_page,
+        page: props.data_product.current_page,
     };
 
     if (column && direction) {
@@ -271,14 +201,7 @@ const handleSort = (column: string) => {
         delete params.direction;
     }
 
-    router.get(`/product`, params, {
-        preserveState: true,
-        onSuccess: (page: any) => {
-            if (page.props.data_product) {
-                data_product.value = page.props.data_product;
-            }
-        }
-    });
+    router.get(`/product`, params, { preserveState: true });
 }
 
 const handlePageChange = (page: number) => {
@@ -310,22 +233,10 @@ const handleConfirmationAction = () => {
     const public_id = targetPublicId.value;
     const type = actionType.value;
 
-    const successCallback = (page: any) => {
-        if (page.props.data_product) {
-            data_product.value = page.props.data_product;
-        }
-    };
-
     if (type === 'archive') {
-        router.patch(`/product/${public_id}/archive`, {}, {
-            preserveScroll: true,
-            onSuccess: successCallback,
-        });
+        router.patch(`/product/${public_id}/archive`, {}, { preserveScroll: true });
     } else if (type === 'destroy') {
-        router.delete(`/product/${public_id}`, {
-            preserveState: true,
-            onSuccess: successCallback,
-        });
+        router.delete(`/product/${public_id}`, { preserveState: true });
     }
 
     targetPublicId.value = null;

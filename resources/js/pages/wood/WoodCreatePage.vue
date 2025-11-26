@@ -43,8 +43,8 @@ import { Head, useForm } from '@inertiajs/vue3';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import type { BreadcrumbItem } from '@/types';
-import type { WoodForm } from '@/types/wood';
+import { type BreadcrumbItem } from '@/types';
+import { type WoodForm } from '@/types/wood';
 
 defineProps({ errors: Object })
 
@@ -65,6 +65,6 @@ const form_wood = useForm<WoodForm>({
 });
 
 const submit = () => {
-    form_wood.post('/wood', { preserveScroll: true, onSuccess: () => form_wood.reset() })
+    form_wood.post('/wood', { preserveScroll: true, onSuccess: () => form_wood.reset() });
 }
 </script>

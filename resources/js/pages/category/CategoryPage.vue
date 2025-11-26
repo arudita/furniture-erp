@@ -86,7 +86,9 @@
                         <TableCell class="text-center">
                             <DropdownMenu>
                                 <DropdownMenuTrigger>
-                                    <Ellipsis class="text-gray-600 hover:cursor-pointer"/>
+                                    <Button type="button" variant="ghost" size="icon" class="cursor-pointer">
+                                        <Ellipsis/>
+                                    </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
@@ -132,8 +134,9 @@ import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { ref } from 'vue';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import type { BreadcrumbItem, InertiaPaginated } from '@/types';
-import type { Category } from '@/types/category';
+import { type BreadcrumbItem, InertiaPaginated } from '@/types';
+import { type Category } from '@/types/category';
+import { Button } from '@/components/ui/button';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {

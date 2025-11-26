@@ -1,15 +1,15 @@
 <template>
     <Head title="Create New Category" />
     <AppLayout :breadcrumbs="breadcrumbs">
-        <Form v-bind="CategoryController.store.form()" :options="{preserveScroll: true}" reset-on-success reset-on-error v-slot="{ errors, processing, recentlySuccessful }" autocomplete="off">
+        <form @submit.prevent="submit" autocomplete="off">
             <div class="flex flex-col p-6">
                 <section class="max-w-xl space-y-6">
                     <HeadingSmall title="Create New Category" description="Ensure your account is using a long, random password to stay secure" />
                     <div class="space-y-6">
                         <div class="grid gap-2">
                             <Label for="name">Name</Label>
-                            <Input id="name" name="name" v-model="form_category.name" type="text" class="mt-1 block w-full" :class="errors.name ? 'border-red-500': ''" placeholder="Name" />
-                            <InputError :message="errors.name || errors.slug" />
+                            <Input id="name" name="name" v-model="form_category.name" type="text" class="mt-1 block w-full" :class="errors?.name ? 'border-red-500': ''" placeholder="Name" />
+                            <InputError :message="errors?.name || errors?.slug" />
                         </div>
                         <div class="grid gap-2">
                             <Label for="slug">Slug</Label>
@@ -44,12 +44,11 @@
                             <p class="text-sm text-muted-foreground">
                                 Optional. Categories, can have a hierarchy. You might have a Table category, and under that have children categories for Dining and Living Room.
                             </p>
-                            <InputError :message="errors.parent_id" />
                         </div>
                         <div class="flex items-center gap-4">
-                            <Button :disabled="processing" data-test="update-password-button" class="cursor-pointer">Save</Button>
+                            <Button :disabled="form_category.processing" data-test="update-password-button" class="cursor-pointer">Save</Button>
                             <Transition enter-active-class="transition ease-in-out" enter-from-class="opacity-0" leave-active-class="transition ease-in-out" leave-to-class="opacity-0">
-                                <p v-show="recentlySuccessful" class="text-sm text-neutral-600">
+                                <p v-show="form_category.recentlySuccessful" class="text-sm text-neutral-600">
                                     Saved.
                                 </p>
                             </Transition>
@@ -57,33 +56,30 @@
                     </div>
                 </section>
             </div>
-        </Form>
+        </form>
     </AppLayout>
 </template>
 
 <script setup lang="ts">
-import CategoryController from '@/actions/App/Http/Controllers/CategoryController';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { Form, Head, useForm, usePage } from '@inertiajs/vue3';
 import HeadingSmall from '@/components/HeadingSmall.vue';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { type BreadcrumbItem } from '@/types';
+import { CheckIcon, ChevronsUpDownIcon } from 'lucide-vue-next';
 import { cn } from '@/lib/utils';
 import { computed, ref, watch } from 'vue';
-import { CheckIcon, ChevronsUpDownIcon } from 'lucide-vue-next';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Head, useForm } from '@inertiajs/vue3';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { type BreadcrumbItem } from '@/types';
+import { type Category, CategoryForm } from '@/types/category';
 
-interface Category {
-    id: number;
-    public_id: string;
-    name: string;
-    slug: string;
-    parent_id?: number;
-}
+const props = defineProps<{
+    data_category: Category[];
+    errors: Category;
+}>();
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -98,16 +94,15 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const openCommand = ref(false);
 const selectedParentId = ref<number | null>(null);
-const data_category = usePage().props.data_category as Category[];
 
-const form_category = useForm({
+const form_category = useForm<CategoryForm>({
     name: '',
     slug: '',
-    parent_id: null as number | null,
+    parent_id: null,
 })
 
 const selectedParentCategory = computed(() =>
-    data_category.find(category => category.id === selectedParentId.value),
+    props.data_category.find(category => category.id === selectedParentId.value),
 )
 const selectCategory = (selectedValue: number | null) => {
     const new_parent_id = selectedValue == selectedParentId.value ? null : selectedValue;
@@ -124,5 +119,8 @@ const GenerateSlug = (text: string) => {
     if (!text) return '';
     return text.toLowerCase().trim().replace(/[^a-z0-9\s-]/g, '').replace(/[\s-]+/g, '-').replace(/^-+|-+$/g, '');;
 }
-</script>
 
+const submit = () => {
+    form_category.post('/category', { preserveScroll: true, onSuccess: () => form_category.reset() });
+}
+</script>

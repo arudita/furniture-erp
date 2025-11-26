@@ -77,7 +77,7 @@ const form_wood = useForm<WoodForm>({
     public_id: props.data_wood.public_id,
     name: props.data_wood.name,
     description: props.data_wood.description,
-})
+});
 
 const submit = () => {
     form_wood.put(`/wood/${props.data_wood.public_id}`, {
