@@ -30,13 +30,13 @@ class Product extends Model
     }
 
     // Product Attribute
-    public function product_attributes(): HasMany
+    public function attributes(): HasMany
     {
         return $this->hasMany(ProductAttribute::class);
     }
 
     // Product Image
-    public function product_images(): HasMany
+    public function images(): HasMany
     {
         return $this->hasMany(ProductImage::class);
     }

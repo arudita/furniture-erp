@@ -20,20 +20,38 @@ export function urlIsActive(
 
     if (currentUrl.startsWith(menuUrl + '/')) {
         const strictMatchUrls = [
-            '/wood/create',
-            '/wood/archived',
             '/category/create',
             '/category/archived',
+            '/product/create',
+            '/product/archived',
+            '/project/create',
+            '/project/archived',
+            '/wood/create',
+            '/wood/archived',
         ];
 
-        if (menuUrl === '/wood') {
+        if (menuUrl === '/category') {
             const isChildRouteWithStrictMatch = strictMatchUrls.includes(currentUrl);
             if (isChildRouteWithStrictMatch) {
                 return false;
             }
         }
 
-        if (menuUrl === '/category') {
+        if (menuUrl === '/product') {
+            const isChildRouteWithStrictMatch = strictMatchUrls.includes(currentUrl);
+            if (isChildRouteWithStrictMatch) {
+                return false;
+            }
+        }
+
+        if (menuUrl === '/project') {
+            const isChildRouteWithStrictMatch = strictMatchUrls.includes(currentUrl);
+            if (isChildRouteWithStrictMatch) {
+                return false;
+            }
+        }
+
+        if (menuUrl === '/wood') {
             const isChildRouteWithStrictMatch = strictMatchUrls.includes(currentUrl);
             if (isChildRouteWithStrictMatch) {
                 return false;

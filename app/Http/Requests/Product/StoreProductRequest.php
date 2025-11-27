@@ -23,7 +23,7 @@ class StoreProductRequest extends FormRequest
             'product_code' => 'nullable|string|max:100',
             'unit_price' => 'nullable|numeric',
             // Product Attribute
-            'attributes' => 'nullable|array',
+            'attributes' => 'nullable|array|max:10',
             'attributes.*.name' => 'required_with:attributes|string|max:50',
             'attributes.*.value' => 'required_with:attributes|string|max:100',
             // Product Image
@@ -39,7 +39,7 @@ class StoreProductRequest extends FormRequest
         return [
             // Product
             'category_id.required' => 'category_id is required',
-            'category_id.exists' => 'category_id is not exist',
+            'category_id.exists' => 'category_id is required',
             'name.required' => 'name is required',
             'name.max' => 'maximum value 100 characters',
             'description.max' => 'maximum value 1000 characters',

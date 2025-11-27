@@ -54,11 +54,9 @@
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    <TableRow v-if="data_project.data.length == 0">
-                        <TableCell></TableCell>
-                        <TableCell class="text-left text-gray-600 dark:text-gray-300" colspan="5">— data is empty —</TableCell>
-                        <TableCell></TableCell>
-                    </TableRow>
+                    <TableEmpty v-if="data_project.data.length == 0" class="text-center text-gray-600 dark:text-gray-300" :colspan="7">
+                        — data is empty —
+                    </TableEmpty>
                     <TableRow v-else v-for="(item, index) in data_project.data" :key="index">
                         <TableCell class="font-medium text-center">
                             {{ index + 1 }}
@@ -100,6 +98,31 @@
                         </TableCell>
                     </TableRow>
                 </TableBody>
+                <TableFooter>
+                    <TableRow>
+                        <TableHead class="w-[5%] text-center">
+                            #
+                        </TableHead>
+                        <TableHead class="w-[25%]">
+                            Name
+                        </TableHead>
+                        <TableHead class="w-[25%]">
+                            Client
+                        </TableHead>
+                        <TableHead class="w-[15%]">
+                            Value
+                        </TableHead>
+                        <TableHead class="w-[10%]">
+                            Status
+                        </TableHead>
+                        <TableHead class="w-[10%]">
+                            Deadline
+                        </TableHead>
+                        <TableHead class="w-[10%] text-center">
+                            Action
+                        </TableHead>
+                    </TableRow>
+                </TableFooter>
             </Table>
             <!-- Pagination -->
             <Pagination v-slot="{ page }" @update:page="handlePageChange" :items-per-page="data_project.per_page" :total="data_project.total" :default-page="data_project.current_page">
@@ -123,40 +146,10 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle
-} from '@/components/ui/alert-dialog';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu';
-import {
-    Pagination,
-    PaginationContent,
-    PaginationEllipsis,
-    PaginationItem,
-    PaginationNext,
-    PaginationPrevious
-} from '@/components/ui/pagination';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow
-} from '@/components/ui/table';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
+import { Table, TableBody, TableCell, TableEmpty, TableFooter, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Ellipsis } from 'lucide-vue-next';
 
 interface Project {

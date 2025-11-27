@@ -46,6 +46,7 @@ class ProductController extends Controller
         $validated = $request->validated();
 
         DB::beginTransaction();
+
         try {
             // Product
             $product = Product::create([
@@ -86,8 +87,8 @@ class ProductController extends Controller
 
             DB::commit();
 
-            Session::flash('success', $this->messages['save_success']);
-            return to_route('product.show', $product->id);
+            return to_route('product.index')->with('success', $this->messages['save_success']);
+            // return to_route('product.show', $product->id)->with('success', $this->messages['save_success']);
         } catch (\Exception $e) {
             Log::error('Failed to save product data: ' . $e->getMessage(), [
                 'input_data' => $validated

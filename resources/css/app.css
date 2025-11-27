@@ -162,6 +162,106 @@
     --sidebar: hsl(240 5.9% 10%);
 }
 
+.light-mode {
+    /* --- Dasar & Netral --- */
+    --background: hsl(30 70% 94.5%); /* #fdf2e2 - Paling terang untuk latar belakang utama */
+    --foreground: hsl(0 0% 10%);     /* Hitam gelap agar mudah dibaca */
+    --card: hsl(30 70% 94.5%);
+    --card-foreground: hsl(0 0% 10%);
+    --popover: hsl(30 70% 94.5%);
+    --popover-foreground: hsl(0 0% 10%);
+
+    /* --- Utama & Aksen (Professional Warm) --- */
+    --primary: hsl(30 38% 68%);      /* #decaaf - Warna tengah untuk tombol/aksi utama */
+    --primary-foreground: hsl(0 0% 10%); /* Teks hitam agar terbaca di atas primary */
+
+    --secondary: hsl(30 50% 85%);    /* #efe0ca - Warna kedua yang lebih terang */
+    --secondary-foreground: hsl(0 0% 10%); /* Teks hitam */
+
+    --muted: hsl(30 70% 90%);        /* Sedikit lebih gelap dari background untuk elemen muted */
+    --muted-foreground: hsl(0 0% 30%); /* Abu-abu gelap untuk teks muted */
+
+    --accent: hsl(30 50% 85%);       /* Sama dengan secondary */
+    --accent-foreground: hsl(0 0% 10%); /* Teks hitam */
+
+    /* --- Status & Lain-lain --- */
+    --destructive: hsl(0 84.2% 60.2%); /* Merah standar untuk peringatan/error */
+    --destructive-foreground: hsl(0 0% 98%); /* Putih */
+
+    --border: hsl(30 38% 75%);       /* Garis batas yang lebih gelap dari secondary */
+    --input: hsl(30 38% 75%);
+    --ring: hsl(30 38% 68%);         /* Ring fokus menggunakan warna primary */
+
+    --radius: 0.5rem;
+
+    /* --- Sidebar (Dibuat sedikit berbeda untuk kontras visual) --- */
+    --sidebar-background: hsl(30 70% 98%); /* Latar belakang sidebar sangat terang */
+    --sidebar-foreground: hsl(0 0% 10%);
+    --sidebar-primary: hsl(30 38% 68%);
+    --sidebar-primary-foreground: hsl(0 0% 10%);
+    --sidebar-accent: hsl(30 50% 85%);
+    --sidebar-accent-foreground: hsl(0 0% 10%);
+    --sidebar-border: hsl(30 38% 75%);
+    --sidebar-ring: hsl(30 38% 68%);
+    --sidebar: hsl(30 70% 98%);
+
+    /* --- Chart Colors (Dapat dipertimbangkan menggunakan warna pelengkap atau analog) --- */
+    --chart-1: hsl(30 50% 50%);  /* Cokelat medium */
+    --chart-2: hsl(200 60% 50%); /* Biru sebagai aksen pelengkap */
+    --chart-3: hsl(100 40% 45%); /* Hijau zaitun */
+    --chart-4: hsl(340 50% 60%); /* Mauve */
+    --chart-5: hsl(60 70% 55%);  /* Kuning keemasan */
+}
+
+.dark-mode {
+    /* --- Dasar & Netral --- */
+    --background: hsl(30 38% 40%);   /* #c2a47b - Warna paling gelap untuk latar belakang utama */
+    --foreground: hsl(0 0% 95%);     /* Putih pudar agar mudah dibaca */
+    --card: hsl(30 38% 40%);
+    --card-foreground: hsl(0 0% 95%);
+    --popover: hsl(30 38% 40%);
+    --popover-foreground: hsl(0 0% 95%);
+
+    /* --- Utama & Aksen (Professional Warm) --- */
+    --primary: hsl(30 38% 85%);      /* #fdf2e2 - Warna terang untuk tombol/aksi utama */
+    --primary-foreground: hsl(0 0% 10%); /* Teks hitam di atas primary */
+
+    --secondary: hsl(30 38% 50%);    /* #d0b693 - Warna kedua yang lebih terang dari background */
+    --secondary-foreground: hsl(0 0% 95%);
+
+    --muted: hsl(30 38% 55%);        /* Sedikit lebih terang dari secondary */
+    --muted-foreground: hsl(0 0% 70%); /* Teks abu-abu terang */
+
+    --accent: hsl(30 38% 50%);
+    --accent-foreground: hsl(0 0% 95%);
+
+    /* --- Status & Lain-lain --- */
+    --destructive: hsl(0 84% 60%);
+    --destructive-foreground: hsl(0 0% 95%);
+
+    --border: hsl(30 38% 60%);       /* Garis batas yang lebih terang */
+    --input: hsl(30 38% 60%);
+    --ring: hsl(30 38% 85%);         /* Ring fokus menggunakan warna primary */
+
+    /* --- Sidebar (Dibuat sedikit berbeda untuk kontras visual) --- */
+    --sidebar-background: hsl(30 38% 30%); /* Sidebar lebih gelap lagi */
+    --sidebar-foreground: hsl(0 0% 95%);
+    --sidebar-primary: hsl(30 38% 85%);
+    --sidebar-primary-foreground: hsl(0 0% 10%);
+    --sidebar-accent: hsl(30 38% 50%);
+    --sidebar-accent-foreground: hsl(0 0% 95%);
+    --sidebar-border: hsl(30 38% 60%);
+    --sidebar-ring: hsl(30 38% 85%);
+    --sidebar: hsl(30 38% 30%);
+
+    /* --- Chart Colors (Disesuaikan untuk latar belakang gelap) --- */
+    --chart-1: hsl(30 80% 75%);  /* Krem/Emas terang */
+    --chart-2: hsl(200 80% 70%); /* Biru terang */
+    --chart-3: hsl(100 60% 70%); /* Hijau lumut terang */
+    --chart-4: hsl(340 70% 75%); /* Pink muda */
+    --chart-5: hsl(60 85% 70%);  /* Kuning cerah */
+}
+
 @layer base {
     * {
         @apply border-border outline-ring/50;

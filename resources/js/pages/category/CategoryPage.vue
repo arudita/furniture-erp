@@ -63,11 +63,9 @@
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    <TableRow v-if="data_category.data.length == 0">
-                        <TableCell></TableCell>
-                        <TableCell class="text-left text-gray-600 dark:text-gray-300" colspan="2">— data is empty —</TableCell>
-                        <TableCell></TableCell>
-                    </TableRow>
+                    <TableEmpty v-if="data_category.data.length == 0" class="text-center text-gray-600 dark:text-gray-300" :colspan="4">
+                        — data is empty —
+                    </TableEmpty>
                     <TableRow v-else v-for="(item, index) in data_category.data" :key="index">
                         <TableCell class="font-medium text-center">
                             {{ index + 1 }}
@@ -107,6 +105,25 @@
                         </TableCell>
                     </TableRow>
                 </TableBody>
+                <TableFooter>
+                    <TableRow>
+                        <TableHead class="w-[5%] text-center">
+                            #
+                        </TableHead>
+                        <TableHead class="w-[30%]">
+                            Name
+                        </TableHead>
+                        <TableHead class="w-[30%]">
+                            Slug
+                        </TableHead>
+                        <TableHead class="w-[25%]">
+                            Parent
+                        </TableHead>
+                        <TableHead class="w-[10%] text-center">
+                            Action
+                        </TableHead>
+                    </TableRow>
+                </TableFooter>
             </Table>
             <!-- Pagination -->
             <Pagination v-slot="{ page }" @update:page="handlePageChange" :items-per-page="data_category.per_page" :total="data_category.total" :default-page="data_category.current_page">
@@ -133,7 +150,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { ref } from 'vue';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableEmpty, TableFooter, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { type BreadcrumbItem, InertiaPaginated } from '@/types';
 import { type Category } from '@/types/category';
 import { Button } from '@/components/ui/button';
